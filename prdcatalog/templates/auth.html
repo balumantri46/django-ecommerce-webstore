@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CartFLow | Authentication</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <style>
+      .hidden {
+        display: none;
+      }
+      /* General Reset */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      header {
+        background: linear-gradient(135deg, #0602f3, #815431);
+        color: white;
+        text-align: center;
+        padding: 1rem 0;
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+      }
+
+      main {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+
+      button {
+        background-color: #7b31f3;
+        color: white;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #27045e;
+      }
+      #signup-btn,
+      #login-btn {
+        border: none;
+        text-decoration: underline;
+        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+        margin: auto;
+        padding: 2px;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      label {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        padding: 0.7rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+      }
+
+      input:focus {
+        border: 1px solid black;
+        /* border-color: black; */
+        outline: none;
+      }
+
+      button[type="submit"] {
+        background-color: linear-gradient(135deg, #0805f0, #6c6a6d);
+        color: white;
+        border: none;
+        padding: 0.7rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #15015f;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 1px;
+      }
+
+      li,
+      .message {
+        background-color: #ffebee;
+        color: #bb5637;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-radius: 5px;
+        text-align: center;
+      }
+      .message.success {
+        border: 1px solid black;
+        color: green;
+        background-color: rgb(255, 255, 255);
+      }
+      .password-container {
+        position: relative;
+        display: block;
+      }
+
+      #login-password {
+        width: 100%;
+      }
+      .toggle-password {
+        position: absolute;
+        right: 2vh;
+        top: 40%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Welcome to CartFlow</h1>
+    </header>
+    <main>
+      <!-- Login Form -->
+      <form id="login-form" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="login" />
+        <label for="username">Username:</label>
+        <input type="text" name="username" required /><br />
+        <label for="password">Password:</label>
+        <div class="password-container">
+          <input type="password" name="password" id="login-password" required />
+          <i
+            class="fa-regular fa-eye toggle-password"
+            onclick="togglePassword()"
+          ></i>
+        </div>
+        <br />
+        <button type="submit">Login</button><br />
+        <p style="text-align: center">
+          don't have an account <button id="signup-btn">Sign Up</button>
+        </p>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signup-form" method="post" class="hidden">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="signup" />
+        {{ form.as_p }}
+
+        <button type="submit">Sign Up</button> <br />
+        <p style="text-align: center">
+          have an account <button id="login-btn">Login</button>
+        </p>
+      </form>
+
+      {% if messages %}
+      <ul>
+        {% for message in messages %}
+        <li class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+          {{ message }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </main>
+
+    <script>
+      const loginBtn = document.getElementById("login-btn");
+      const signupBtn = document.getElementById("signup-btn");
+      const loginForm = document.getElementById("login-form");
+      const signupForm = document.getElementById("signup-form");
+
+      loginBtn.addEventListener("click", () => {
+        loginForm.classList.remove("hidden");
+        signupForm.classList.add("hidden");
+      });
+
+      signupBtn.addEventListener("click", () => {
+        signupForm.classList.remove("hidden");
+        loginForm.classList.add("hidden");
+      });
+
+      function togglePassword() {
+        const passinp = document.getElementById("login-password");
+        const icon = document.querySelector(".toggle-password");
+
+        if (passinp.type === "password") {
+          passinp.type = "text";
+          icon.classList.remove("fa-eye");
+          icon.classList.add("fa-eye-slash");
+        } else {
+          passinp.type = "password";
+          icon.classList.remove("fa-eye-slash");
+          icon.classList.add("fa-eye");
+        }
+      }
+    </script>
+  </body>
+  <footer style="text-align: center">
+    <p>&copy; 2025 CF Store. All rights reserved.</p>
+  </footer>
+</html>
