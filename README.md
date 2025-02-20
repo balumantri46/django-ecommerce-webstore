@@ -1,6 +1,7 @@
 # An Ecommerce WebStore Made with django
  - This webstore has a strong user friendly experience and security.
  - This has user authentication, and cart for adding the products.
+
 to use it.
 
 1. `clone` the repo.
