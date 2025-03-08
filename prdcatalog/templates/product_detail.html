@@ -1,0 +1,309 @@
+{% block content %}
+<div class="cart-header">
+  <h2>Product Details</h2>
+  <a href="{% url 'prdlist' %}" class="back-icon">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  <a href="{% url 'cart_detail' %}" class="cart-icon">
+    <i class="fas fa-shopping-cart"></i>
+  </a>
+</div>
+
+<div class="product-detail-container">
+  <div class="product-image-section">
+    {% if product.img %}
+    <img
+      src="{{ product.img }}"
+      alt="{{ product.name }}"
+      class="detail-image"
+    />
+    {% endif %}
+  </div>
+
+  <div class="product-info-section">
+    <h1 class="product-title">{{ product.name }}</h1>
+    <div class="price-section">
+      {% if product.in_price != product.fn_price %}
+      <p class="price">
+        <span class="original-price">${{product.in_price}}</span>
+        <span class="final-price">${{ product.fn_price }}</span>
+        {% if sub %}
+        <span class="discount-tag"> Save $ {{sub}} </span>
+        {% endif %}
+      </p>
+      {% else %}
+      <p class="price">${{product.fn_price}}</p>
+      {% endif %}
+    </div>
+
+    <div class="description">
+      <h3>Description</h3>
+      <p>{{ product.desp }}</p>
+      <br />
+      <h3>Brand</h3>
+      <p>{{product.brand}}</p>
+      <h3>Reviews</h3>
+      <p>
+        {{product.reviews}}
+        <br />
+        {% if product.reviews >= 100 %}
+        <span
+          class="stars {% if product.reviews >= 500 %}five-stars {% elif product.reviews >= 400 %}four-stars {% elif product.reviews >= 300 %}three-stars {% elif product.reviews >= 200 %}two-stars {% else %}one-star{% endif %}"
+        >
+          {% if product.reviews >= 4400 %}★★★★★ {% elif product.reviews >=3400
+          %}★★★★ {% elif product.reviews >= 2000 %}★★★ {% elif product.reviews
+          >=900 %}★★ {% else %}★ {% endif %}
+        </span>
+        {% endif %}
+      </p>
+    </div>
+
+    <form
+      method="POST"
+      action="{% url 'add_to_cart' product.id %}"
+      class="add-to-cart-form"
+    >
+      {% csrf_token %}
+      <div class="quantity-control">
+        <label for="quantity">Quantity:</label>
+        <div class="quantity-wrapper">
+          <button type="button" class="quantity-btn minus">-</button>
+          <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            value="1"
+            min="1"
+            class="quantity-input"
+          />
+          <button type="button" class="quantity-btn plus">+</button>
+        </div>
+      </div>
+      <button type="submit" class="add-to-cart-btn">
+        <i class="fas fa-shopping-cart"></i> Add to Cart
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+  .product-detail-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+
+  .product-image-section {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .product-image-section img {
+    width: 50%;
+    height: 50%;
+    object-fit: fill;
+  }
+
+  .detail-image {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .product-title {
+    font-size: 2.5rem;
+    color: #2d3748;
+    margin-bottom: 1rem;
+  }
+
+  .price-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .price {
+    font-size: 2rem;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .original-price {
+    text-decoration: line-through;
+    color: #a0aec0;
+    font-size: 1.5rem;
+  }
+
+  .final-price {
+    color: #2d2fda;
+    font-weight: bold;
+  }
+
+  .discount-tag {
+    background-color: #069e40;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  .description {
+    margin: 2rem 0;
+  }
+
+  .description h3 {
+    font-size: 1.5rem;
+    color: #2d3748;
+    margin-bottom: 1rem;
+  }
+
+  .description p {
+    color: #4a5568;
+    line-height: 1.8;
+  }
+
+  .add-to-cart-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .quantity-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .quantity-btn {
+    background: #f7fafc;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #2d3748;
+  }
+
+  .quantity-btn:hover {
+    background: #edf2f7;
+  }
+
+  .quantity-input {
+    width: 60px;
+    text-align: center;
+    border: none;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .add-to-cart-btn {
+    background-color: #2d2fda;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .add-to-cart-btn:hover {
+    background-color: #10069e;
+  }
+
+  .back-icon {
+    font-size: 1.5rem;
+    color: #2d3748;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .back-icon:hover {
+    color: #4f46e5;
+  }
+
+  @media (max-width: 768px) {
+    .product-detail-container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .product-title {
+      font-size: 2rem;
+    }
+
+    .price {
+      font-size: 1.5rem;
+    }
+  }
+
+  .stars {
+    margin-left: 10px;
+    font-size: 1.2rem;
+  }
+
+  .one-star {
+    color: #ff4444; /* Red */
+  }
+
+  .two-stars,
+  .three-stars {
+    color: #ffbb33; /* Yellow */
+  }
+
+  .four-stars,
+  .five-stars {
+    color: #00c851; /* Green */
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const quantityInput = document.querySelector(".quantity-input");
+    const minusBtn = document.querySelector(".minus");
+    const plusBtn = document.querySelector(".plus");
+
+    minusBtn.addEventListener("click", () => {
+      const currentValue = parseInt(quantityInput.value);
+      if (currentValue > 1) {
+        quantityInput.value = currentValue - 1;
+      }
+    });
+
+    plusBtn.addEventListener("click", () => {
+      const currentValue = parseInt(quantityInput.value);
+      quantityInput.value = currentValue + 1;
+    });
+  });
+</script>
+
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  rel="stylesheet"
+/>
+{% endblock %}

@@ -23,7 +23,7 @@ def cart_detail(request):
         defaults={'cart_id': str(request.user.id)}
     )
     cart_items = CartItem.objects.filter(cart=cart)
-    total = sum(item.product.price * item.quantity for item in cart_items)
+    total = sum(item.product.fn_price * item.quantity for item in cart_items)
     
     return render(request, 'cart/cart_detail.html', {
         'cart_items': cart_items,
@@ -49,7 +49,7 @@ def add_to_cart(request, product_id):
         messages.success(request, f'{product.name} added to cart successfully!')
     
     return redirect('prdlist')
-
+@login_required
 def remove_from_cart(request, product_id):
     # product = get_object_or_404(Product, id=product_id)
     # cart = get_or_create_cart(request)
@@ -82,6 +82,8 @@ def update_cart_item(request, product_id):
             cart_item.delete()
             
     return redirect('cart_detail')
+def success(request):
+    return render(request, 'cart/sucess.html')
 
 # Remove unused functions
 # def clear_cart and def update_cart

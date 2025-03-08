@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!-- <!-- <!DOCTYPE html>
 <html>
     <head><title>CartFlow Store | products</title></head>
     <style>
@@ -119,60 +119,273 @@ a {
 </body>
 </html> -->
 
-
-
 <!-- new -->
 {% block content %}
 <div class="cart-header">
   <h2>Products Catalog</h2>
-  <a href="{% url 'home' %}" class="home-icon">
-    <i class="fas fa-home"></i>
-  </a>
-  <a href="{% url 'cart_detail' %}" class="cart-icon">
+  <div class="icon-links">
+    <form method="GET" action="{% url 'product_list' %}" class="search-form">
+      <input
+        type="text"
+        name="category"
+        placeholder="Search by category"
+        class="search-input"
+      />
+      <button type="submit" class="search-button">
+        <i class="fa-brands fa-searchengin fa-2xl"></i>
+      </button>
+    </form>
+
+    <a href="{% url 'home' %}" class="home-icon">
+      <i class="fas fa-home"></i>
+    </a>
+    <a href="{% url 'cart_detail' %}" class="cart-icon">
       <i class="fas fa-shopping-cart"></i>
-  </a>
+    </a>
+  </div>
 </div>
+<div class="filter-section">
+  <form action="{% url 'product_list' %}" method="GET" class="filter-form">
+    <select name="sort" class="filter select">
+      <option value="">Sort by Price</option>
+      <option value="low_to_high" {% if request.GET.sort == 'low_to_high' %} selected {% endif %}>
+        Low to High
+      </option>
+      <option value="high_to_low" {% if request.GET.sort == 'high_to_low' %} selected {% endif %}>
+        High to Low
+      </option>
+    </select>
+    <label class="discount-filter">
+      <input type="checkbox" name="show_discounted" value="true" 
+             {% if show_discounted %}checked{% endif %}
+             onchange="this.form.submit()">
+      Show Discounted Items Only
+    </label>
+    <button type="submit" class="filter-button">Apply Filters</button>
+  </form>
+</div>
+
 <div class="product-grid">
-    {% for product in prds %}
-    <div class="product-card">
-        <img src="{{ product.img.url }}" alt="{{ product.name }}" class="product-image">
-        <div class="product-details">
-            <h3>{{ product.name }}</h3>
-            <p class="price">₹{{ product.price }}</p>
-            <form method="POST" action="{% url 'add_to_cart' product.id %}">
-                {% csrf_token %}
-                <div class="quantity-control">
-                    <input type="number" name="quantity" value="1" min="1" class="quantity-input">
-                    <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-                </div>
-            </form>
-        </div>
+  {% if prds %} {% for product in prds %}
+  <div class="product-card">
+    {% if product.img %}
+    <div id="item-img">
+      <a href="{% url 'product_detail' product.id %}">
+        <img src="{{ product.img }}" alt="{{ product.name }}" />
+      </a>
     </div>
-    {% endfor %}
+    {% endif %}
+    <div class="product-details">
+      <h3>
+        <a
+          href="{% url 'product_detail' product.id %}"
+          style="text-decoration: none; color: black"
+          >{{ product.name }}</a
+        >
+      </h3>
+      <div id="p-d">
+        {% if product.in_price != product.fn_price %}
+        <p class="price">
+          $ <del>{{product.in_price}}</del> {{ product.fn_price }}
+        </p>
+        <p id="discount-tag">
+          <i class="fa-solid fa-tags" style="padding-top: 3px"></i> discount
+        </p>
+        {% else %}
+        <p class="price">$ {{product.fn_price}}</p>
+        {% endif %}
+        <form method="POST" action="{% url 'add_to_cart' product.id %}" id="fm">
+          {% csrf_token %}
+          <div class="quantity-control">
+            <input
+              type="number"
+              name="quantity"
+              value="1"
+              min="1"
+              class="quantity-input"
+            />
+            <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %} {% else %}
+  <h3
+    style="
+      white-space: nowrap;
+      text-align: center;
+      font-size: 1.6rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    "
+  >
+    There are no Products in this category.
+  </h3>
+  {% endif %}
 </div>
 {% if messages %}
-        {% for message in messages %}
-            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
-                {{ message }}
-                <button class="close-message">&times;</button>
-            </div>
-        {% endfor %}
-    {% endif %}
+<div class="messages-container">
+  {% for message in messages %}
+  <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+    {{ message }}
+    <button class="close-message">&times;</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 
 <style>
+  .filter-section {
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filter-form {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+  
+.filter-select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.discount-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.discount-filter input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.filter-button {
+  padding: 8px 16px;
+  background-color: #2d2fda;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.filter-button:hover {
+  background-color: #10069e;
+}
+  .cart-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 1rem;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    height: max-content;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    margin-top: 10px;
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-grow: 1;
+  }
+
+  .search-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    min-width: 300px;
+    margin-right: 10px;
+  }
+
+  .search-button {
+    padding: 10px 20px;
+    background-color: #2d2fda;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 2.2rem;
+  }
+
+  .search-button:hover {
+    background-color: #10069e;
+  }
+
+  .icon-links {
+    display: flex;
+    gap: 15px;
+  }
+  /* .icons {
+    padding-left: 2rem;
+    display: flex;
+    gap: 1rem;
+    width: 50%;
+    background-color: black;
+  } */
+  .home-icon,
+  .cart-icon {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #2d3748;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .home-icon:hover,
+  .cart-icon:hover {
+    color: #4f46e5;
+  }
+
+  #discount-tag {
+    padding-left: 1vh;
+    background-color: rgb(107, 241, 70);
+    color: rgb(58, 2, 110);
+    border-radius: 8px 0 0 8px;
+    width: 48%;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: 2px;
+  }
   .cart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 4px 2rem;
     background: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
     z-index: 100;
-}
+  }
 
-.cart-icon ,.home-icon{
+  .cart-icon,
+  .home-icon {
     font-size: 1.5rem;
     color: #2d3748;
     text-decoration: none;
@@ -181,63 +394,75 @@ a {
     align-items: center;
     gap: 0.5rem;
     margin-left: 10px;
-}
-.home-icon{
-  margin-left: 80%;
-}
+  }
+  .home-icon {
+    margin-left: 80%;
+  }
 
-.cart-icon:hover {
+  .cart-icon:hover {
     color: #4f46e5;
-}
-.product-grid {
+  }
+  .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 2rem;
+    gap: 1.6rem;
     padding: 2rem;
-}
+  }
 
-.product-card {
+  .product-card {
     background: white;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
     overflow: hidden;
-}
+    display: flex;
 
-.product-card:hover {
+    flex-direction: column; 
+    justify-content: space-between; 
+    height: 100%;
+  }
+
+  .product-card:hover {
     transform: translateY(-5px);
-}
+    transform: scale(1.14);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
 
-.product-image {
-    width: 100%;
-    height: 200px;
+  #item-img img {
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0;
+    width: auto;
+    height: 150px;
     object-fit: cover;
-}
+    border-radius: 8px;
+  }
 
-.product-details {
+  .product-details {
     padding: 1rem;
-}
+  }
 
-.price {
+  .price {
     color: #2c3e50;
     font-size: 1.2rem;
     font-weight: bold;
-}
+  }
 
-.quantity-control {
+  .quantity-control {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
-}
+  }
 
-.quantity-input {
+  .quantity-input {
     width: 60px;
     padding: 0.5rem;
     border: 1px solid #ddd;
     border-radius: 4px;
-}
+  }
 
-.add-to-cart-btn {
+  .add-to-cart-btn {
     flex: 1;
     background-color: #2d2fda;
     color: white;
@@ -246,12 +471,12 @@ a {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-}
+  }
 
-.add-to-cart-btn:hover {
+  .add-to-cart-btn:hover {
     background-color: #10069e;
-}
-.messages-container {
+  }
+  .messages-container {
     position: fixed;
     bottom: 20px;
     right: 0px;
@@ -260,32 +485,32 @@ a {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
+  }
 
-.message {
-  margin-left: auto;
+  .message {
+    margin-left: auto;
     padding: 12px 24px;
     border-radius: 8px;
     background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     gap: 12px;
     animation: slideIn 0.3s ease-out;
     max-width: 300px;
-}
+  }
 
-.message.success {
+  .message.success {
     background: #49d17b;
     color: white;
-}
+  }
 
-.message.error {
+  .message.error {
     background: #d46363;
     color: white;
-}
+  }
 
-.close-message {
+  .close-message {
     background: none;
     border: none;
     color: currentColor;
@@ -293,56 +518,65 @@ a {
     cursor: pointer;
     padding: 0 4px;
     margin-left: auto;
-}
+  }
 
-@keyframes slideIn {
+  @keyframes slideIn {
     from {
-        transform: translateX(100%);
-        opacity: 0;
+      transform: translateX(100%);
+      opacity: 0;
     }
     to {
-        transform: translateX(0);
-        opacity: 1;
+      transform: translateX(0);
+      opacity: 1;
     }
-}
+  }
 
-@keyframes fadeOut {
+  @keyframes fadeOut {
     from {
-        transform: translateX(0);
-        opacity: 1;
+      transform: translateX(0);
+      opacity: 1;
     }
     to {
-        transform: translateX(100%);
-        opacity: 0;
+      transform: translateX(100%);
+      opacity: 0;
     }
-}
+  }
 </style>
-
-<!-- Add this JavaScript for message auto-dismiss -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // Auto-dismiss messages after 3 seconds
-    const messages = document.querySelectorAll('.message');
-    messages.forEach(message => {
+    const messages = document.querySelectorAll(".message");
+    messages.forEach((message) => {
+      setTimeout(() => {
+        message.style.animation = "fadeOut 0.3s ease-out forwards";
         setTimeout(() => {
-          message.style.animation = 'fadeOut 0.3s ease-out forwards';
-            setTimeout(() => {
-                message.remove();
-            }, 300);
-        }, 1000);
+          message.remove();
+        }, 300);
+      }, 1000);
     });
 
     // Close message on click
-    document.querySelectorAll('.close-message').forEach(button => {
-        button.addEventListener('click', () => {
-            const message = button.parentElement;
-            message.style.animation = 'fadeOut 0.3s ease-out forwards';
-            setTimeout(() => {
-                message.remove();
-            }, 100);
-        });
+    document.querySelectorAll(".close-message").forEach((button) => {
+      button.addEventListener("click", () => {
+        const message = button.parentElement;
+        message.style.animation = "fadeOut 0.3s ease-out forwards";
+        setTimeout(() => {
+          message.remove();
+        }, 1000);
+      });
     });
-});
+  });
+  const s_btn = document.querySelector(".search-button");
+  s_btn.addEventListener("mouseover", () => {
+    s_btn.classList.add("fa-bounce");
+  });
+  s_btn.addEventListener("mouseout", () => {
+    s_btn.classList.remove("fa-bounce");
+  });
 </script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  rel="stylesheet"
+/>
 {% endblock %}
+

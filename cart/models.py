@@ -25,6 +25,6 @@ class CartItem(models.Model):
     #property is used as a geter that gets the subtotal of the cart item when called by CartItem.subtotal
     @property 
     def subtotal(self):
-        return self.quantity * self.product.price
+        return self.quantity * self.product.fn_price
 
 # Create your models here.
